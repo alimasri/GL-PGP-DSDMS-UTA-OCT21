@@ -1,5 +1,4 @@
 resource "google_sql_database_instance" "maindb" {
-  name = var.database_name
   database_version    = "MYSQL_8_0"
   region              = var.region
   root_password       = var.root_database_password
