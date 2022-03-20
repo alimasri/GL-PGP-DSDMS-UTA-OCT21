@@ -32,16 +32,16 @@ level_6 = mean - 3 * sd
 def read_dataframe(file_path):
     df = pd.read_csv(FILEPATH + file_path)
     if df.shape[0] == 0:
-        print("Dataframe is empty!")
+        raise ValueError("Dataframe is empty!")
     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
     return df
 
 def validate_file_task(**context):
-    file_path = os.listdir(FILEPATH)[0]
     # check if we can read and parse the file
     try:
+        file_path = os.listdir(FILEPATH)[0]
         df = read_dataframe(file_path)
-    except ValueError as e:
+    except Exception as e:
         print(e)
         return 'validation_failed'
 
@@ -55,8 +55,7 @@ def validate_file_task(**context):
     if start_date_from_file_name.date() == match.date():
         context['ti'].xcom_push(key="file_path", value=file_path)
         return 'validation_passed'
-    else:
-        return 'validation_failed'
+    return 'validation_failed'
 
 
 def ingest_into_db(**context):
@@ -155,6 +154,5 @@ with DAG(
 
     start_task >> file_sensor >> validate_new_file
     validate_new_file >> [validation_failed, validation_passed]
-    validation_failed >> validation_failed_slack
+    validation_failed >> validation_failed_slack >> end_task
     validation_passed >> ingest_into_db_task >> flag_anomaly_task >> end_task
-    validation_failed_slack >> end_task
