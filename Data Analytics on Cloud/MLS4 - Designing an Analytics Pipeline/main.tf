@@ -46,5 +46,5 @@ output "database_instance_name" {
 }
 
 output "airflow_bucket_path" {
-  value = dirname(google_composer_environment.composer-env.config[0].dag_gcs_prefix)
+  value = google_composer_environment.composer-env.config[0].dag_gcs_prefix
 }
